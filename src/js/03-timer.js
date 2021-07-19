@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import Tick from '@pqina/flip';
 import '@pqina/flip/dist/flip.min.js';
 import '@pqina/flip/dist/flip.min.css';
+import '../sass/timer.scss';
 
 const refs = {
   input: document.querySelector('#date-selector'),
@@ -158,13 +159,96 @@ function convertMs(ms) {
   return { days, hours, minutes, seconds };
 }
 
-// function setupFlip(tick) {
-//   Tick.helper.interval(function () {
-//     tick.value++;
+function setupFlip(tick) {
+  Tick.helper.interval(function () {
+    tick.value++;
 
-//     // The aria-label attribute is used
-//     // instead of the actual tick
-//     // content
-//     tick.root.setAttribute('aria-label', tick.value);
-//   }, 1000);
+    // The aria-label attribute is used
+    // instead of the actual tick
+    // content
+    tick.root.setAttribute('aria-label', tick.value);
+  }, 1000);
+}
+
+// function handleTickInit(tick) {
+//   // uncomment to set labels to different language
+//   /*
+//         var locale = {
+//             YEAR_PLURAL: 'Jaren',
+//             YEAR_SINGULAR: 'Jaar',
+//             MONTH_PLURAL: 'Maanden',
+//             MONTH_SINGULAR: 'Maand',
+//             WEEK_PLURAL: 'Weken',
+//             WEEK_SINGULAR: 'Week',
+//             DAY_PLURAL: 'Dagen',
+//             DAY_SINGULAR: 'Dag',
+//             HOUR_PLURAL: 'Uren',
+//             HOUR_SINGULAR: 'Uur',
+//             MINUTE_PLURAL: 'Minuten',
+//             MINUTE_SINGULAR: 'Minuut',
+//             SECOND_PLURAL: 'Seconden',
+//             SECOND_SINGULAR: 'Seconde',
+//             MILLISECOND_PLURAL: 'Milliseconden',
+//             MILLISECOND_SINGULAR: 'Milliseconde'
+//         };
+
+//         for (var key in locale) {
+//             if (!locale.hasOwnProperty(key)) { continue; }
+//             tick.setConstant(key, locale[key]);
+//         }
+//         */
+
+//   // format of due date is ISO8601
+//   // https://en.wikipedia.org/wiki/ISO_8601
+
+//   // '2018-01-31T12:00:00'        to count down to the 31st of January 2018 at 12 o'clock
+//   // '2019'                       to count down to 2019
+//   // '2018-01-15T10:00:00+01:00'  to count down to the 15th of January 2018 at 10 o'clock in timezone GMT+1
+
+//   // create the countdown counter
+//   var counter = Tick.count.down('2021-01-01T00:00:00+01:00');
+
+//   counter.onupdate = function (value) {
+//     tick.value = value;
+//   };
+
+//   counter.onended = function () {
+//     // redirect, uncomment the next line
+//     // window.location = 'my-location.html'
+//     // hide counter, uncomment the next line
+//     // tick.root.style.display = 'none';
+//     // show message, uncomment the next line
+//     // document.querySelector('.tick-onended-message').style.display = '';
+//   };
 // }
+
+function handleTickInit(tick) {
+  // get timer offset (if not found, set to today)
+  var offset = new Date(localStorage.getItem('countdown-offset') || new Date());
+
+  // store the offset (not really necessary but saves some if statements)
+  localStorage.setItem('countdown-offset', offset);
+
+  // time in hours the timer will run down
+  var timeDuration = Tick.helper.duration(24, 'hours');
+
+  // add 24 hours to get final deadline
+  var deadline = new Date(offset.setMilliseconds(offset.getMilliseconds() + timeDuration));
+
+  // create counter
+  var counter = Tick.count.down(deadline, { format: ['h', 'm', 's'] });
+
+  // update tick with the counter value
+  counter.onupdate = function (value) {
+    tick.value = value;
+  };
+
+  counter.onended = function () {
+    // redirect, uncomment the next line
+    // window.location = 'my-location.html'
+    // hide counter, uncomment the next line
+    // tick.root.style.display = 'none';
+    // show message, uncomment the next line
+    // document.querySelector('.tick-onended-message').style.display = '';
+  };
+}
